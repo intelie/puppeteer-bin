@@ -78,8 +78,8 @@ function PortableDocumentFormat(args) {
     return async function (page) {
         const options = {
             path: args.dest,
-            width: parseFloat(args.width) + 9.7 * 2 + 'px',
-            height: parseFloat(args.height) + 9.7 * 2 + 'px',
+            width: parseFloat(args.width) + 10 * 2 + 'px',
+            height: parseFloat(args.height) + 16 * 2 + 'px',
             format: args.format,
             printBackground: true,
             margin: {
