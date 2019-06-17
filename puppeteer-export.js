@@ -3,11 +3,11 @@
  *
  * Uses Chromium web browser to perform actions such as generate
  * a screenshot or create a pdf.
- * 
+ *
  * Usage: node puppeteer-export.js --type=PORTABLE_DOCUMENT_FORMAT --source=/path/to/source.html --dest=/path/to/dest.pdf --format=A4 --width=400 --height=200
- * 
+ *
  * Global puppeteerOptions:
- * 
+ *
  * --type=(PORTABLE_DOCUMENT_FORMAT|IMAGE): Creates a PDF|IMAGE version from HTML file:
  *      Options:
  *          --source: {Path} HTML file to be converted to PDF.
@@ -15,8 +15,8 @@
  *          --format: {String} Print paper size (A0, A1, A2, A3, A4, Legal, ...)
  *                    defaults to A4 if no {width} or {height} are provided.
  *                    This option override {widht} and {height}.
- *          --width : {Number} Width of the PDF in pixels. Is overrided by {format}.
- *          --height: {Number} Height of the PDF in pixels. Is overrided by {format}.
+ *          --width : {Number} Width of the PDF in pixels. Is overridden by {format}.
+ *          --height: {Number} Height of the PDF in pixels. Is overridden by {format}.
  *          --executablePath: {Path} Path to a chromium executable.
  *
 */
@@ -26,7 +26,7 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 
-async function checkArugments () {
+async function checkArugments() {
 
     const possibleTypes = ['PORTABLE_DOCUMENT_FORMAT', 'IMAGE'];
     const args = {
@@ -62,7 +62,7 @@ async function checkArugments () {
         args.source = __dirname + '/' + args.source;
         args.dest = __dirname + '/' + args.dest;
     }
-    
+
     try {
         await fileAccess(args.source);
         await fileAccess(path.dirname(args.dest));
@@ -97,7 +97,7 @@ function PortableDocumentFormat(args) {
 }
 
 function PortableNetworkGraphics(args) {
-    return async function(page) {
+    return async function (page) {
         const options = {
             path: args.dest,
             type: 'png',
@@ -119,12 +119,11 @@ function PortableNetworkGraphics(args) {
 async function start() {
     try {
         const args = await checkArugments();
-        const content = fs.readFileSync(args.source, 'utf8');
 
         if (args.type === 'PORTABLE_DOCUMENT_FORMAT')
-            await exportHtmlTo(content, PortableDocumentFormat(args), args.executablePath);
+            await exportHtmlTo(args.source, PortableDocumentFormat(args), args.executablePath);
         else if (args.type === 'IMAGE')
-            await exportHtmlTo(content, PortableNetworkGraphics(args), args.executablePath);
+            await exportHtmlTo(args.source, PortableNetworkGraphics(args), args.executablePath);
 
         process.exitCode = 0;
 
@@ -138,7 +137,7 @@ async function start() {
     }
 }
 
-async function exportHtmlTo (contentHtml, _export, executablePath = undefined) {
+async function exportHtmlTo(source, _export, executablePath = undefined) {
     try {
 
         const browser = await puppeteer.launch({
@@ -150,7 +149,7 @@ async function exportHtmlTo (contentHtml, _export, executablePath = undefined) {
         const page = await browser.newPage();
 
         await page.setViewport({ width: 1920, height: 1080 });
-        await page.setContent(contentHtml);
+        await page.goto('file://' + source, { waitUntil: 'networkidle0' });
         await _export(page);
         await browser.close();
 
