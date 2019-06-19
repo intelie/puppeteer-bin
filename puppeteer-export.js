@@ -26,7 +26,7 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 
-async function checkArugments() {
+async function checkArugments () {
 
     const possibleTypes = ['PORTABLE_DOCUMENT_FORMAT', 'IMAGE'];
     const args = {
@@ -137,19 +137,19 @@ async function start() {
     }
 }
 
-async function exportHtmlTo(source, _export, executablePath = undefined) {
+async function exportHtmlTo (source, _export, executablePath = undefined) {
     try {
 
         const browser = await puppeteer.launch({
             defaultViewport: { width: 1920, height: 1080 },
-            args: ['--window-size=1920,1080', '--no-sandbox'],
+            args: ['--window-size=1920,1080', '--no-sandbox', '--font-render-hinting=medium'],
             executablePath: executablePath,
         });
 
         const page = await browser.newPage();
 
         await page.setViewport({ width: 1920, height: 1080 });
-        await page.goto('file://' + source, { waitUntil: 'networkidle0' });
+        await page.goto('file://' + source, {waitUntil: 'networkidle0'});
         await _export(page);
         await browser.close();
 

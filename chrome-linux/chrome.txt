@@ -1,0 +1,1 @@
+https://puppeteer-bin.s3.amazonaws.com/chrome-linux/chrome
