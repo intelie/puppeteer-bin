@@ -98,6 +98,13 @@ function PortableDocumentFormat(args) {
 
 function PortableNetworkGraphics(args) {
     return async function (page) {
+        const height = await page.evaluate(`(function(){
+            return document.querySelector('.widget-exporter-printable-element').offsetHeight;
+        })()`);
+        const width = await page.evaluate(`(function(){
+            return document.querySelector('.widget-exporter-printable-element').offsetWidth;
+        })()`);
+
         const options = {
             path: args.dest,
             type: 'png',
@@ -105,8 +112,8 @@ function PortableNetworkGraphics(args) {
             clip: {
                 x: 0,
                 y: 0,
-                width: parseFloat(args.width),
-                height: parseFloat(args.height)
+                width: parseFloat(width || args.width),
+                height: parseFloat(height || args.height)
             }
         }
 
@@ -161,3 +168,4 @@ async function exportHtmlTo (source, _export, executablePath = undefined) {
 }
 
 start();
+
