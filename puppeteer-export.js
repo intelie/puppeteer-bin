@@ -74,12 +74,21 @@ async function checkArugments () {
     return args;
 }
 
+const getDimensions = `(function(){
+    const h = document.querySelector('.widget-exporter-printable-element').offsetHeight;
+    const w = document.querySelector('.widget-exporter-printable-element').offsetWidth;
+
+    return [w, h];
+})()`
+
 function PortableDocumentFormat(args) {
     return async function (page) {
+        const [width, height] = await page.evaluate(getDimensions);
+
         const options = {
             path: args.dest,
-            width: parseFloat(args.width) + 10 * 2 + 'px',
-            height: parseFloat(args.height) + 16 * 2 + 'px',
+            width: parseFloat(width || args.width) + 10 * 2 + 'px',
+            height: parseFloat(height || args.height) + 16 * 2 + 'px',
             format: args.format,
             printBackground: true,
             margin: {
@@ -98,12 +107,7 @@ function PortableDocumentFormat(args) {
 
 function PortableNetworkGraphics(args) {
     return async function (page) {
-        const height = await page.evaluate(`(function(){
-            return document.querySelector('.widget-exporter-printable-element').offsetHeight;
-        })()`);
-        const width = await page.evaluate(`(function(){
-            return document.querySelector('.widget-exporter-printable-element').offsetWidth;
-        })()`);
+        const [width, height] = await page.evaluate(getDimensions);
 
         const options = {
             path: args.dest,
@@ -156,7 +160,10 @@ async function exportHtmlTo (source, _export, executablePath = undefined) {
         const page = await browser.newPage();
 
         await page.setViewport({ width: 1920, height: 1080 });
-        await page.goto('file://' + source, {waitUntil: 'networkidle0'});
+        await page.goto('file://' + source, { waitUntil: 'networkidle0' });
+        await page.evaluate(`(function () {
+            document.querySelector('body').classList.add('puppeteer-print');
+        })()`);
         await _export(page);
         await browser.close();
 
