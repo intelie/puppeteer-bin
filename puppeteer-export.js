@@ -149,9 +149,11 @@ async function start() {
 }
 
 async function exportHtmlTo (source, _export, executablePath = undefined) {
+    let browser = null;
+
     try {
 
-        const browser = await puppeteer.launch({
+        browser = await puppeteer.launch({
             defaultViewport: { width: 1920, height: 1080 },
             args: ['--window-size=1920,1080', '--no-sandbox', '--font-render-hinting=medium'],
             executablePath: executablePath,
@@ -170,6 +172,8 @@ async function exportHtmlTo (source, _export, executablePath = undefined) {
         return 0;
 
     } catch (err) {
+        if (browser !== null) await browser.close();
+
         throw err;
     }
 }
