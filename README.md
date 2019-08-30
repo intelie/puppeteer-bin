@@ -44,6 +44,12 @@ The new usage is:
 
 Same as before just replace `node puppeteer-export.js` for `./puppeteer`.
 
+##### Pack for Live
+Open the terminal and type:
+```./pack.sh 1.0```
+It will generate a dist folder with a zip file containing all resources.
+
+
 #### Golang Client
 You can use https://github.com/raff/godet or https://github.com/mafredri/cdp implementations of the protocol to get rid of Puppeteer and build the same CLI in Golang thus reducing the bundle size.
 
