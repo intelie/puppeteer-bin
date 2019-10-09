@@ -13,7 +13,7 @@ to create a CLI that export a HTML file as an image or as PDF document.
 
 ##### Usage:
 ```
-node puppeteer-export.js --type=PORTABLE_DOCUMENT_FORMAT --source=/path/to/source.html --dest=/path/to/dest.pdf --format=A4 --width=400 --height=200
+node puppeteer-export.js --type=PORTABLE_DOCUMENT_FORMAT --source=/path/to/source.html --dest=/path/to/dest.pdf --format=A4 --width=400 --height=200 --executablePath=/opt/google/chrome/chrome
 
 --type=PORTABLE_DOCUMENT_FORMAT: {String} media type can be IMAGE or PORTABLE_DOCUMENT_FORMAT
 --source=/path/to/source.html: {Path} path of HTML input file
@@ -33,14 +33,14 @@ Usage:
 
 Open the terminal and type: 
 
-```pkg puppeteer-exporter.js --output=puppeteer```
+```pkg wrapper.js --output=puppeteer --target=node10```
 
 Now you have a executable called <i>puppeteer</i> that dont requires
 NodeJS to work.
 
 The new usage is:
 
-```./puppeteer --type=IMAGE --source=/path/to/source.html --dest=/path/to/dest.png --width=300px --height=200px --executablePath=/path/to/chromium```
+```./puppeteer ./puppeteer-export.js --type=IMAGE --source=/path/to/source.html --dest=/path/to/dest.png --width=300px --height=200px --executablePath=/path/to/chromium```
 
 Same as before just replace `node puppeteer-export.js` for `./puppeteer`.
 

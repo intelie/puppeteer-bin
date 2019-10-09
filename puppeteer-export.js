@@ -21,10 +21,10 @@
  *
 */
 
-const puppeteer = require('puppeteer');
-const fs = require('fs');
-const path = require('path');
-const { promisify } = require('util');
+var puppeteer = require('puppeteer');
+var fs = require('fs');
+var path = require('path');
+var { promisify } = require('util');
 
 async function checkArugments () {
 
@@ -81,15 +81,45 @@ const getDimensions = `(function(){
     return [w, h];
 })()`
 
+const getElementRealHeight = `(function(){
+    function determineElementHeight (element, height) {
+        var h = Math.max(element.offsetHeight, element.scrollHeight)
+
+        if (h > height) height = h
+
+        var arr = element.children || []
+        if (element === undefined || arr.length !== 1) return height
+
+        return determineElementHeight(element.firstElementChild, height)
+    }
+
+    var el = document.querySelector('.widget-content')
+
+    if (!el) return null
+
+    var scrollHolder = el.querySelector('.widget-scroll-content')
+
+    var finalHeight = 0
+
+    if (scrollHolder) finalHeight = Math.max(scrollHolder.offsetHeight, scrollHolder.scrollHeight)
+    else finalHeight = determineElementHeight(el, 0)
+
+    var headerHeight = document.querySelector('.widget-container').offsetHeight - el.offsetHeight
+
+    return (finalHeight + headerHeight)
+})()`
+
 function PortableDocumentFormat(args) {
     return async function (page) {
         const [width, height] = await page.evaluate(getDimensions);
+        const __height = await page.evaluate(getElementRealHeight);
 
         const options = {
             path: args.dest,
             width: parseFloat(width || args.width) + 10 * 2 + 'px',
-            height: parseFloat(height || args.height) + 16 * 2 + 'px',
-            format: args.format,
+            height: parseFloat(__height || height || args.height) + 16 * 2 + 'px',
+            format: args.format === 'WYSIWYG' ? undefined : args.format,
+            scale: (args.format === 'A4' && width > 795) ? (795 / width) : undefined,
             printBackground: true,
             margin: {
                 top: '0.25cm',
@@ -108,6 +138,7 @@ function PortableDocumentFormat(args) {
 function PortableNetworkGraphics(args) {
     return async function (page) {
         const [width, height] = await page.evaluate(getDimensions);
+        const __height = await page.evaluate(getElementRealHeight);
 
         const options = {
             path: args.dest,
@@ -117,7 +148,7 @@ function PortableNetworkGraphics(args) {
                 x: 0,
                 y: 0,
                 width: parseFloat(width || args.width),
-                height: parseFloat(height || args.height)
+                height: parseFloat(__height || height || args.height)
             }
         }
 
@@ -144,7 +175,7 @@ async function start() {
         console.error(err);
         process.exitCode = 1;
 
-        return 1;
+        throw err;
     }
 }
 
@@ -156,7 +187,7 @@ async function exportHtmlTo (source, _export, executablePath = undefined) {
         browser = await puppeteer.launch({
             defaultViewport: { width: 1920, height: 1080 },
             args: ['--window-size=1920,1080', '--no-sandbox', '--font-render-hinting=medium'],
-            executablePath: executablePath,
+            executablePath: executablePath
         });
 
         const page = await browser.newPage();
@@ -179,4 +210,3 @@ async function exportHtmlTo (source, _export, executablePath = undefined) {
 }
 
 start();
-
