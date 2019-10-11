@@ -25,7 +25,10 @@ var puppeteer = require('puppeteer');
 var fs = require('fs');
 var path = require('path');
 var { promisify } = require('util');
-
+var A4_WIDTH = {
+    portrait: 794,
+    landscape: 1123
+}
 async function checkArugments () {
 
     const possibleTypes = ['PORTABLE_DOCUMENT_FORMAT', 'IMAGE'];
@@ -36,7 +39,8 @@ async function checkArugments () {
         format: undefined,
         width: undefined,
         height: undefined,
-        executablePath: undefined
+        executablePath: undefined,
+        orientation: undefined
     };
 
     // Getting arguments
@@ -113,14 +117,17 @@ function PortableDocumentFormat(args) {
     return async function (page) {
         const [width, height] = await page.evaluate(getDimensions);
         const __height = await page.evaluate(getElementRealHeight);
+        const orientation = args.orientation === 'landscape' ? 'landscape' : 'portrait'
+        const paperWidth = A4_WIDTH[orientation]
 
         const options = {
             path: args.dest,
             width: parseFloat(width || args.width) + 10 * 2 + 'px',
             height: parseFloat(__height || height || args.height) + 16 * 2 + 'px',
             format: args.format === 'WYSIWYG' ? undefined : args.format,
-            scale: (args.format === 'A4' && width > 795) ? (795 / width) : undefined,
+            scale: (args.format === 'A4' && width > paperWidth) ? (paperWidth / width) : undefined,
             printBackground: true,
+            landscape: orientation === 'landscape',
             margin: {
                 top: '0.25cm',
                 bottom: '0.25cm',
